@@ -9,7 +9,9 @@ environment:
 # Add regular dependencies here.
 dependencies:
   http: ^1.6.0
+  lat_lng_to_timezone: ^0.2.0
   path: ^1.9.0
+  timezone: ^0.11.0
 
 dev_dependencies:
   lints: ^6.0.0

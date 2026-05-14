@@ -1,11 +1,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'weather_data.dart';
 
 class ForecastProvider {
   List<WeatherData> hourlyForecast = [];
+  bool _initialized = false;
+
+  void _initialize() {
+    tz.initializeTimeZones();
+  }
 
   Future<bool> fetchHourlyForecast() async {
+    if (!_initialized) {
+      _initialize();
+      _initialized = true;
+    }
+
     hourlyForecast.clear();
 
     // latitude and longitude of Schloß Johannisburg in Aschaffenburg
@@ -18,7 +31,7 @@ class ForecastProvider {
 
     // 'https://api.open-meteo.com/v1/forecast?latitude=49.97606&longitude=9.14163&hourly=temperature_2m,precipitation,cloud_cover&forecast_days=1';
     final url =
-        "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&hourly=temperature_2m,precipitation,cloud_cover&forecast_days=1&timezone=auto";
+        "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&hourly=temperature_2m,precipitation,cloud_cover&forecast_days=1";
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode != 200) {
@@ -40,13 +53,20 @@ class ForecastProvider {
     precipAmounts = List<double?>.from(data['hourly']['precipitation']);
     cloudCovers = List<int?>.from(data['hourly']['cloud_cover']);
 
+    var timezoneName = latLngToTimezoneString(lat, lon);
+    final tzLocation = tz.getLocation(timezoneName);
+    final nowInUtc = DateTime.now().toUtc();
+
     for (int i = 0; i < times.length; i++) {
-      final localTime = DateTime.parse(times[i]);
-      var data = WeatherData(localTime);
-      data.temp = temps[i];
-      data.precipAmount = precipAmounts[i];
-      data.cloudCover = cloudCovers[i];
-      hourlyForecast.add(data);
+      final timeInUtc = DateTime.parse("${times[i]}Z");
+      if (timeInUtc.isAfter(nowInUtc)) {
+        final localTime = tz.TZDateTime.from(timeInUtc, tzLocation);
+        var data = WeatherData(localTime);
+        data.temp = temps[i];
+        data.precipAmount = precipAmounts[i];
+        data.cloudCover = cloudCovers[i];
+        hourlyForecast.add(data);
+      }
     }
     return true;
   }

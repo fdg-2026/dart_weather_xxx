@@ -3,9 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'location_provider.dart';
 import 'weather_data.dart';
 
 class ForecastProvider {
+  ForecastProvider(this._locationProvider);
+
+  final LocationProvider _locationProvider;
   List<WeatherData> hourlyForecast = [];
   bool _initialized = false;
 
@@ -20,14 +24,8 @@ class ForecastProvider {
     }
 
     hourlyForecast.clear();
-
-    // latitude and longitude of Schloß Johannisburg in Aschaffenburg
-    var lat = 49.97606;
-    var lon = 9.14163;
-
-    // latitude and longitude for Sydney
-    // var lat = -33.86785;
-    // var lon = 151.20732;
+    var lat = _locationProvider.selectedLocation.latitude;
+    var lon = _locationProvider.selectedLocation.longitude;
 
     // 'https://api.open-meteo.com/v1/forecast?latitude=49.97606&longitude=9.14163&hourly=temperature_2m,precipitation,cloud_cover&forecast_days=1';
     final url =

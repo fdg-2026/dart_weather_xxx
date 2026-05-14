@@ -6,6 +6,8 @@ class LocationProvider {
     LocationData(name: "Sydney", latitude: -33.86785, longitude: 151.20732),
     LocationData(name: "New York", latitude: 40.71427, longitude: -74.00597),
     LocationData(name: "Tokio", latitude: 35.6895, longitude: 139.69171),
+    // latitude must be between -90 (south) and +90 (north)
+    LocationData(name: "invalid", latitude: 90.1, longitude: 139.69171),
   ];
 
   String _selectedLocationName = "Aschaffenburg";

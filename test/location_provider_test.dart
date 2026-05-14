@@ -20,6 +20,6 @@ void main() {
   test('test getLocationNames', () {
     var locationProvider = LocationProvider();
     var names = locationProvider.getLocationNames();
-    expect(names.length == 4, true);
+    expect(names.length == 5, true);
   });
 }

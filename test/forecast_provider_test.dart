@@ -37,4 +37,15 @@ void main() {
       true,
     );
   });
+
+  test('enforce API error', () async {
+    var locationProvider = LocationProvider();
+    var forecastProvider = ForecastProvider(locationProvider);
+
+    bool succeeded = locationProvider.selectLocation("invalid");
+    expect(succeeded, true);
+    succeeded = await forecastProvider.fetchHourlyForecast();
+    expect(succeeded, false);
+    expect(forecastProvider.hourlyForecast.length, 0);
+  });
 }

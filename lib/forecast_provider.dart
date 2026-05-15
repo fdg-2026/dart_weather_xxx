@@ -7,9 +7,11 @@ import 'location_provider.dart';
 import 'weather_data.dart';
 
 class ForecastProvider {
-  ForecastProvider(this._locationProvider);
+  ForecastProvider(this._locationProvider, {http.Client? client})
+    : _client = client ?? http.Client();
 
   final LocationProvider _locationProvider;
+  final http.Client _client; // Use this instead of the static http.get
   List<WeatherData> hourlyForecast = [];
   bool _initialized = false;
 
@@ -31,7 +33,7 @@ class ForecastProvider {
     final url =
         "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&hourly=temperature_2m,precipitation,cloud_cover&forecast_days=1";
 
-    final response = await http.get(Uri.parse(url));
+    final response = await _client.get(Uri.parse(url));
     if (response.statusCode != 200) {
       print(
         "statusCode in response from open-meteo api was ${response.statusCode}",
